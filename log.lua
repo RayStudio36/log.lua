@@ -16,19 +16,36 @@
 ---@field public warn LogFunc
 ---@field public error LogFunc
 ---@field public fatal LogFunc
-local log = {_version = "0.1.0"}
+local log = { _version = "0.1.1" }
 
 log.usecolor = true
 log.outfile = nil
-log.level = "trace"
+log.modes = {
+    TRACE = "trace",
+    DEBUG = "debug",
+    INFO = "info",
+    WARN = "warn",
+    ERROR = "error",
+    FATAL = "fatal",
+}
+
+log.level = log.modes.TRACE
+
+log._handlers = {}
+
+---@param level string log level
+---@param handler fun(msg: string) handler
+function log.setLogHandler(level, handler)
+    log._handlers[level] = handler
+end
 
 local modes = {
-    {name = "trace", color = "\27[34m"},
-    {name = "debug", color = "\27[36m"},
-    {name = "info", color = "\27[32m"},
-    {name = "warn", color = "\27[33m"},
-    {name = "error", color = "\27[31m"},
-    {name = "fatal", color = "\27[35m"}
+    { name = log.modes.TRACE, color = "\27[34m" },
+    { name = log.modes.DEBUG, color = "\27[36m" },
+    { name = log.modes.INFO, color = "\27[32m" },
+    { name = log.modes.WARN, color = "\27[33m" },
+    { name = log.modes.ERROR, color = "\27[31m" },
+    { name = log.modes.FATAL, color = "\27[35m" }
 }
 
 local levels = {}
@@ -68,9 +85,7 @@ for i, x in ipairs(modes) do
         local info = debug.getinfo(2, "Sl")
         local lineinfo = info.short_src .. ":" .. info.currentline
 
-        -- Output to console
-        print(
-            string.format(
+        local outputContent = string.format(
                 "%s[%-6s%s]%s %s: %s",
                 log.usecolor and x.color or "",
                 nameupper,
@@ -78,8 +93,14 @@ for i, x in ipairs(modes) do
                 log.usecolor and "\27[0m" or "",
                 lineinfo,
                 msg
-            )
         )
+
+        -- Output to console
+        if log._handlers[x.name] then
+            log._handlers[x.name](outputContent)
+        else
+            print(outputContent)
+        end
 
         -- Output to log file
         if log.outfile then
