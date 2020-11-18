@@ -23,6 +23,12 @@ if one is set -- the log file:
 * **log.warn(...)**
 * **log.error(...)**
 * **log.fatal(...)**
+* **log.traceFormat(formatstring, ...)**
+* **log.debugFormat(formatstring, ...)**
+* **log.infoFormat(formatstring, ...)**
+* **log.warnFormat(formatstring, ...)**
+* **log.errorFormat(formatstring, ...)**
+* **log.fatalFormat(formatstring, ...)**
 
 
 ### Additional options

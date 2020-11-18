@@ -8,6 +8,7 @@
 --
 
 ---@alias LogFunc fun(...):void
+---@alias LogFormatFunc fun(format: string, ...):void
 
 ---@class Log
 ---@field public trace LogFunc
@@ -16,6 +17,12 @@
 ---@field public warn LogFunc
 ---@field public error LogFunc
 ---@field public fatal LogFunc
+---@field public traceFormat LogFormatFunc
+---@field public debugFormat LogFormatFunc
+---@field public infoFormat LogFormatFunc
+---@field public warnFormat LogFormatFunc
+---@field public errorFormat LogFormatFunc
+---@field public fatalFormat LogFormatFunc
 local log = { _version = "0.1.1" }
 
 log.usecolor = true
@@ -109,6 +116,10 @@ for i, x in ipairs(modes) do
             fp:write(str)
             fp:close()
         end
+    end
+
+    log[x.name .. "Format"] = function(format, ...)
+        log[x.name](string.format(format, ...))
     end
 end
 
